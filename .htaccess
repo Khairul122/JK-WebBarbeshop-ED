@@ -1,0 +1,11 @@
+# Aktifkan mod_rewrite
+RewriteEngine On
+
+# Atur direktori root
+RewriteBase /
+
+# Atur aturan Rewrite
+# Contoh: Redirect semua permintaan ke index.php
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ index.php?url=$1 [QSA,L]

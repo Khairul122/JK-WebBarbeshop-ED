@@ -1,0 +1,167 @@
+<?php
+include 'includes/config.php';
+include 'includes/format_rupiah.php';
+include 'includes/library.php';
+
+// Ambil bulan dan tahun dari URL
+$bulan_tahun = $_GET['bulan_tahun'];
+$awal = $bulan_tahun . "-01"; // Tambahkan tanggal awal bulan
+$akhir = date('Y-m-t', strtotime($bulan_tahun)); // Tambahkan tanggal akhir bulan
+
+$stt = "Sudah Dibayar";
+$stt1 = "Selesai";
+$sqlsewa = "SELECT * FROM transaksi WHERE (stt_trx='$stt' OR stt_trx='$stt1') AND tgl_bayar BETWEEN '$awal' AND '$akhir'";
+$querysewa = mysqli_query($koneksidb, $sqlsewa);
+?>
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="rental mobil">
+    <meta name="author" content="">
+
+    <title>
+        <?php echo $pagedesc; ?>
+    </title>
+
+    <link href="img/fav.png" rel="icon" type="images/x-icon">
+
+    <!-- Bootstrap Core CSS -->
+    <link href="../assets/new/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link href="../assets/new/offline-font.css" rel="stylesheet">
+    <link href="../assets/new/custom-report.css" rel="stylesheet">
+
+    <!-- Custom Fonts -->
+    <link href="../assets/new/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+    <!-- jQuery -->
+    <script src="../assets/new/jquery.min.js"></script>
+
+</head>
+
+<body>
+    <section id="header-kop">
+        <div class="container-fluid">
+            <table class="table table-borderless">
+                <tbody>
+                    <tr>
+                        <td rowspan="3" width="16%" class="text-center">
+                            <img src="img/logo2.jpg" alt="logo-dkm" width="80" />
+                        </td>
+                        <td class="text-center">
+                            <h3>Barbershop Melody </h3>
+                        </td>
+                        <td rowspan="3" width="16%">&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td class="text-center">Kurao Pagang, Kec. Nanggalo, Kota Padang, Sumatera Barat</td>
+                    </tr>
+                </tbody>
+            </table>
+            <hr class="line-top" />
+        </div>
+    </section>
+
+    <section id="body-of-report">
+        <div class="container-fluid">
+            <h4 class="text-center">Laporan Bulanan</h4>
+            <h5 class="text-center">
+                <?php echo date('F Y', strtotime($_GET['bulan_tahun'])); ?>
+            </h5>
+            <br />
+            <table id="zctb" class="display table table-striped table-bordered table-hover" cellspacing="0"
+                width="100%">
+                <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>No booking</th>
+                        <th>Tanggal Booking</th>
+                        <th>Nama Paket</th>
+                        <th>Total Bayar</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php
+                    $no = 0;
+                    $pemasukan = 0;
+                    while ($result = mysqli_fetch_array($querysewa)) {
+                        $paket = $result['id_paket'];
+                        $sqlpaket = "SELECT * FROM paket WHERE id_paket='$paket'";
+                        $querypaket = mysqli_query($koneksidb, $sqlpaket);
+                        $res = mysqli_fetch_array($querypaket);
+                        $pemasukan += $res['harga'];
+                        $no++;
+                        ?>
+                        <tr align="center">
+                            <td>
+                                <?php echo $no; ?>
+                            </td>
+                            <td>
+                                <?php echo htmlentities($result['id_trx']); ?>
+                            </td>
+                            <td>
+                                <?php echo IndonesiaTgl(htmlentities($result['tgl_trx'])); ?>
+                            </td>
+                            <td>
+                                <?php echo $res['nama_paket']; ?>
+                            </td>
+                            <td>
+                                <?php echo format_rupiah($res['harga']); ?>
+                            </td>
+                        </tr>
+                    <?php } ?>
+                </tbody>
+                <tfoot>
+                    <?php
+                    echo '<tr>';
+                    echo '<th colspan="4" class="text-center">Total Pemasukan</th>';
+                    echo '<th class="text-center">' . format_rupiah($pemasukan) . '</th>';
+                    echo '</tr>';
+                    ?>
+                </tfoot>
+            </table>
+
+            <br>
+            <br>
+            <div style="text-align:left;margin-right:125px;">
+                <p>Padang,
+                    <?= date('d M Y'); ?>
+                </p>
+                <p>Pimpinan Barbershop Melody</p>
+                <br>
+                <br>
+                <br>
+                <?php
+                $nama_pimpinan = isset($_GET['nama_pimpinan']) ? $_GET['nama_pimpinan'] : '';
+
+                // Tampilkan nama pimpinan di halaman cetak
+                echo "<p>$nama_pimpinan</p>";
+                ?>
+            </div>
+
+        </div><!-- /.container -->
+    </section>
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('#jumlah').terbilang({
+                'style': 3,
+                'output_div': "jumlah2",
+                'akhiran': "Rupiah",
+            });
+
+            window.print();
+        });
+    </script>
+
+    <!-- Bootstrap Core JavaScript -->
+    <script src="../assets/new/bootstrap.min.js"></script>
+
+</body>
+
+</html>
